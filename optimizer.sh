@@ -278,23 +278,6 @@ set_timezone() {
     fi
     press_enter
 }
-logo1="     ______    _______    __      _______        __      _____  ___   "
-logo2="    /      \  |   __  \  |  \    /       \      /  \     \    \|   \  "
-logo3="   /  ____  \ (  |__)  ) |   |  |         |    /    \    |.\   \    | "
-logo4="  /  /    )  )|   ____/  |   |  |_____/   )   /' /\  \   |: \   \   | "
-logo5=" (  (____/  / (   /      |.  |   //      /   //  __'  \  |.  \    \.| "
-logo6="  \        / /    \      /\  |\ |:  __   \  /   /  \\   \ |    \    \| "
-logo7="   \_____/ (_______)    (__\_|_)|__|  \___)(___/    \___)\___|\____\) "
-
-logo() {
-echo -e "${BLUE}${logo1:0:24}${RED}${logo1:24:19}${WHITE}${logo1:43:14}${GREEN}${logo1:57}${NC}"
-echo -e "${BLUE}${logo2:0:24}${RED}${logo2:24:19}${WHITE}${logo2:43:14}${GREEN}${logo2:57}${NC}"
-echo -e "${BLUE}${logo3:0:24}${RED}${logo3:24:19}${WHITE}${logo3:43:14}${GREEN}${logo3:57}${NC}"
-echo -e "${BLUE}${logo4:0:24}${RED}${logo4:24:19}${WHITE}${logo4:43:14}${GREEN}${logo4:57}${NC}"
-echo -e "${BLUE}${logo5:0:24}${RED}${logo5:24:19}${WHITE}${logo5:43:14}${GREEN}${logo5:57}${NC}"
-echo -e "${BLUE}${logo6:0:24}${RED}${logo6:24:19}${WHITE}${logo6:43:14}${GREEN}${logo6:57}${NC}"
-echo -e "${BLUE}${logo7:0:24}${RED}${logo7:24:19}${WHITE}${logo7:43:14}${GREEN}${logo7:57}${NC}"
-}
 
 spin() {
     SPINNER="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
@@ -920,21 +903,17 @@ logo
 echo && echo -e "    ${MAGENTA} Your server fully optimized successfully${NC}"
 printf "\e[93m+-------------------------------------+\e[0m\n" 
 echo && echo -e "${MAGENTA}Please reboot the system to take effect, by running the following command: ${GREEN}reboot${NC}"
-echo && echo -e "${MAGENTA}Please visit me at: ${GREEN}https://t.me/OPIranCluB ${NC}"
+echo && echo -e "${MAGENTA}Please visit me at: ${GREEN}https://t.me/ ${NC}"
 echo && printf "\e[93m+-------------------------------------+\e[0m\n" 
 echo && ask_reboot
 }
 while true; do
     clear
-    tg_title="https://t.me/OPIranCluB"
-    yt_title="youtube.com/@opiran-institute"
     clear
     logo
     echo -e "\e[93m╔═══════════════════════════════════════════════╗\e[0m"  
     echo -e "\e[93m║            \e[94mVPS OPTIMIZER                      \e[93m║\e[0m"   
     echo -e "\e[93m╠═══════════════════════════════════════════════╣\e[0m"
-    echo && echo -e "${BLUE}   ${tg_title}   ${NC}"
-    echo -e "${BLUE}   ${yt_title}   ${NC}"
     echo && echo -e "\e[93m+-----------------------------------------------+\e[0m" 
     echo && printf "${GREEN} 1) ${NC} Optimizer (1-click)${NC}\n"
     printf "${GREEN} 2) ${NC} Optimizer (step by step)${NC}\n"
