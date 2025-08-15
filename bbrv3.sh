@@ -55,7 +55,7 @@ cpu_level() {
         esac
     fi
 
-cpu_support_info=$(/usr/bin/awk -f <(wget -qO - https://raw.githubusercontent.com/opiran-club/VPS-Optimizer/main/checkcpu.sh))
+cpu_support_info=$(/usr/bin/awk -f <(wget -qO - https://raw.githubusercontent.com/arminskuyg31286/VPS-Optimizer/main/checkcpu.sh))
     if [[ $cpu_support_info == "CPU supports x86-64-v"* ]]; then
         cpu_support_level=${cpu_support_info#CPU supports x86-64-v}
         echo -e "${MAGENTA}Current CPU Level:${GREEN} x86-64 Level $cpu_support_level${NC}"
@@ -68,7 +68,7 @@ cpu_support_info=$(/usr/bin/awk -f <(wget -qO - https://raw.githubusercontent.co
 
 install_xanmod() {
     clear
-    cpu_support_info=$(/usr/bin/awk -f <(wget -qO - https://raw.githubusercontent.com/opiran-club/VPS-Optimizer/main/checkcpu.sh))
+    cpu_support_info=$(/usr/bin/awk -f <(wget -qO - https://raw.githubusercontent.com/arminskuyg31286/VPS-Optimizer/main/checkcpu.sh))
     
     if [[ $cpu_support_info == "CPU supports x86-64-v"* ]]; then
         cpu_support_level=${cpu_support_info#CPU supports x86-64-v}
