@@ -291,56 +291,62 @@ spin() {
 fix_dns() {
     clear
     title="DNS Replacement"
-    logo
-    echo && echo -e "${MAGENTA}$title${NC}"
-    echo && printf "\e[93m+-------------------------------------+\e[0m\n"
-    interface_name=$(ip -o link show | awk '/state UP/ {print $2}' | sed 's/:$//')
+    echo -e "\n${MAGENTA}$title${NC}"
+    echo -e "\n\e[93m+-------------------------------------+\e[0m"
+
+    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$' | head -n 1)
     if [ -z "$interface_name" ]; then
-        echo && echo -e "${RED}Error: Could not determine network interface.${NC}"
+        echo -e "\n${RED}Error: Could not determine network interface.${NC}"
         return 1
     fi
-    echo && echo -e "${YELLOW}Select DNS provider:${NC}"
-    echo -e "$RED 1. $CYAN Google Public DNS (8.8.8.8, 8.8.4.4)${NC}"
-    echo -e "$RED 2. $CYAN Cloudflare DNS (1.1.1.1, 1.1.1.2)${NC}"
-    echo -e "$RED 3. $CYAN Quad9 DNS (9.9.9.9, 149.112.112.112)${NC}"
-    echo -e "$RED 4. $CYAN 403 online DNS (Iranians anti tahrim) (10.202.10.202, 10.202.10.102)${NC}"
-    echo && read -p "Enter your choice (1-4): " choice
-    case $choice in
-        1)
-            dns_servers="nameserver 8.8.8.8\nnameserver 8.8.4.4"
-            ;;
-        2)
-            dns_servers="nameserver 1.1.1.1\nnameserver 1.1.1.2"
-            ;;
-        3)
-            dns_servers="nameserver 9.9.9.9\nnameserver 149.112.112.112"
-            ;;
-        4)
-            dns_servers="nameserver 10.202.10.202\nnameserver 10.202.10.102"
-            ;;
-        *)
-            echo && echo -e "${RED}Invalid choice.${NC}"
-            return 1
-            ;;
-    esac
-    if ! command -v resolvconf >/dev/null 2>&1; then
-        echo && echo -e "${YELLOW}resolvconf not found, attempting to install...${NC}"
-        if ! apt-get install -y resolvconf; then
-            echo && echo -e "${RED}Error installing resolvconf.${NC}"
-            return 1
+
+    declare -A dns_list=(
+        ["Google"]="8.8.8.8 8.8.4.4"
+        ["Cloudflare"]="1.1.1.1 1.0.0.1"
+        ["Quad9"]="9.9.9.9 149.112.112.112"
+        ["403DNS"]="10.202.10.202 10.202.10.102"
+    )
+
+    echo -e "\n${YELLOW}Checking DNS latency...${NC}"
+    count=1
+    declare -A dns_choice_map
+
+    for provider in "${!dns_list[@]}"; do
+        first_ip=$(echo ${dns_list[$provider]} | awk '{print $1}')
+        ping_time=$(ping -c 3 -q "$first_ip" 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
+        ping_time=${ping_time:-99999}
+        ping_time=${ping_time%.*}
+        ping_times[$provider]=$ping_time
+        echo -e "$RED $count. $CYAN Ping: $ping_time ms - $provider (${dns_list[$provider]})${NC}"
+        dns_choice_map[$count]=$provider
+        ((count++))
+    done
+
+    while true; do
+        read -p "Enter your choice (1-${#dns_choice_map[@]}): " choice
+        if [[ -n "${dns_choice_map[$choice]}" ]]; then
+            provider="${dns_choice_map[$choice]}"
+            dns_servers=$(echo -e "${dns_list[$provider]}" | sed 's/^/nameserver /')
+            break
+        else
+            echo -e "${RED}Invalid choice. Please enter a valid number.${NC}"
         fi
+    done
+    if ! command -v resolvconf >/dev/null 2>&1; then
+        echo -e "\n${YELLOW}resolvconf not found, attempting to install...${NC}"
+        apt-get install -y resolvconf || {
+            echo -e "\n${RED}Error installing resolvconf.${NC}"
+            return 1
+        }
     fi
     if command -v resolvconf >/dev/null 2>&1; then
-        echo && echo -e "${YELLOW}Using resolvconf to configure DNS...${NC}"
-        echo "$dns_servers" | resolvconf -a "$interface_name"
+        echo -e "\n${YELLOW}Using resolvconf to configure DNS...${NC}"
+        echo -e "$dns_servers" | resolvconf -a "$interface_name"
     else
-        echo && echo -e "${YELLOW}resolvconf not found, using /etc/resolv.conf...${NC}"
-        rm -rf /etc/resolv.conf && touch /etc/resolv.conf
-        echo "$dns_servers" > /etc/resolv.conf
+        echo -e "\n${YELLOW}Using /etc/resolv.conf directly...${NC}"
+        echo -e "$dns_servers" > /etc/resolv.conf
     fi
-    spin & SPIN_PID=$!
-    wait $SPIN_PID
-    echo && echo -e "${GREEN}System DNS Optimized.${NC}"
+    echo -e "\n${GREEN}System DNS Optimized.${NC}"
     sleep 1
     press_enter
 }
