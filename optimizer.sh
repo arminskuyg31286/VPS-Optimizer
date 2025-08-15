@@ -307,28 +307,29 @@ fix_dns() {
         ["403DNS"]="10.202.10.202 10.202.10.102"
     )
 
-    echo -e "\n${YELLOW}Checking best DNS automatically...${NC}"
-    best_dns=""
-    best_latency=9999
+    echo -e "\n${YELLOW}Checking DNS latency...${NC}"
+    count=1
+    declare -A dns_choice_map
 
     for provider in "${!dns_list[@]}"; do
         first_ip=$(echo ${dns_list[$provider]} | awk '{print $1}')
         ping_time=$(ping -c 3 -q "$first_ip" 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
-        if [ -n "$ping_time" ] && (( $(echo "$ping_time < $best_latency" | bc -l) )); then
-            best_latency=$ping_time
-            best_dns=${dns_list[$provider]}
-        fi
+        ping_time=${ping_time:-999}
+        echo -e "$RED $count. $CYAN Ping: $ping_time ms - $provider (${dns_list[$provider]})${NC}"
+        dns_choice_map[$count]=$provider
+        ((count++))
     done
 
-    echo -e "${GREEN}Best DNS selected: ${best_dns}${NC}"
-    read -p "Do you want to use this DNS? (Y/n): " user_choice
-    if [[ "$user_choice" =~ ^[Nn]$ ]]; then
-        echo -e "${YELLOW}Keeping previous DNS.${NC}"
-        press_enter
-        return 0
-    fi
-
-    dns_servers=$(echo -e "$best_dns" | sed 's/^/nameserver /')
+    while true; do
+        read -p "Enter your choice (1-${#dns_choice_map[@]}): " choice
+        if [[ -n "${dns_choice_map[$choice]}" ]]; then
+            provider="${dns_choice_map[$choice]}"
+            dns_servers=$(echo -e "${dns_list[$provider]}" | sed 's/^/nameserver /')
+            break
+        else
+            echo -e "${RED}Invalid choice. Please enter a valid number.${NC}"
+        fi
+    done
 
     if ! command -v resolvconf >/dev/null 2>&1; then
         echo -e "\n${YELLOW}resolvconf not found, attempting to install...${NC}"
@@ -725,7 +726,6 @@ ask_bbr_version() {
         fi
     }
    check_os() {
-        # Check virtualization and warn if LXC or OpenVZ, as they may not support some features
         if _exists "virt-what"; then
             virt="$(virt-what)"
         elif _exists "systemd-detect-virt"; then
@@ -797,10 +797,8 @@ queuing() {
 
 case $choice in
       1)
-            # BBR with selected queuing algorithm
             cp /etc/sysctl.conf /etc/sysctl.conf.bak
             queuing
-            # Apply the selected queuing algorithm and BBR settings
             sed -i '/^net.core.default_qdisc/d' /etc/sysctl.conf
             echo "net.core.default_qdisc=$algorithm" >> /etc/sysctl.conf
             echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
@@ -809,7 +807,7 @@ case $choice in
     2)
         echo -e "${YELLOW}Installing and configuring XanMod & BBRv3...${NC}"
         if grep -Ei 'ubuntu|debian' /etc/os-release >/dev/null; then
-            bash <(curl -s https://raw.githubusercontent.com/opiran-club/VPS-Optimizer/main/bbrv3.sh --ipv4) || { echo -e "${RED}XanMod & BBRv3 installation failed.${NC}"; exit 1; }
+            bash <(curl -s https://raw.githubusercontent.com/arminskuyg31286/VPS-Optimizer/main/bbrv3.sh --ipv4) || { echo -e "${RED}XanMod & BBRv3 installation failed.${NC}"; exit 1; }
             echo -e "${GREEN}XanMod & BBRv3 installation was successful.${NC}"
         else
             echo -e "${RED}This script is intended for Ubuntu or Debian systems only.${NC}"
@@ -822,7 +820,6 @@ case $choice in
         sed -i '/^net.core.default_qdisc/d' /etc/sysctl.conf
         echo "net.core.default_qdisc=$algorithm" >> /etc/sysctl.conf
         sed -i '/^net.ipv4.tcp_congestion_control=/c\net.ipv4.tcp_congestion_control=hybla' /etc/sysctl.conf
-        # Additional sysctl settings here
         sysctl -p || { echo -e "${RED}Optimization failed. Restoring original sysctl configuration.${NC}"; mv /etc/sysctl.conf.bak /etc/sysctl.conf; }
         echo -e "${GREEN}Kernel parameter optimization for Hybla was successful.${NC}"
         ;;
@@ -909,21 +906,21 @@ echo && ask_reboot
 }
 while true; do
     clear
-    echo -e "\e[93m════════════════════════════\e[0m"  
-    echo -e "        \e[94mVPS OPTIMIZER\e[0m"
-    echo -e "\e[93m════════════════════════════\e[0m"
-
+    echo -e ""
+    echo -e "       \e[94mVPS OPTIMIZER\e[0m"
+    echo -e ""
     echo -e "\e[93m+------------------------------------+\e[0m" 
     printf "${GREEN} 1) ${NC}Optimizer (1-click)\n"
     printf "${GREEN} 2) ${NC}Optimizer (step by step)\n"
+    echo -e ""
     printf "${GREEN} 3) ${NC}Swap Management\n"
     printf "${GREEN} 4) ${NC}Grub Tuning\n"
     printf "${GREEN} 5) ${NC}BBR Optimization\n"
+    echo -e ""
     printf "${GREEN} 6) ${NC}Speedtest\n"
     printf "${GREEN} 7) ${NC}Benchmark VPS\n"
-    echo -e "\e[93m+------------------------------------+\e[0m" 
+    echo -e ""
     printf "${GREEN} E) ${NC}Exit the menu\n"
-
     echo
     echo -ne "${GREEN}Select an option: ${NC}"
     read -r choice
