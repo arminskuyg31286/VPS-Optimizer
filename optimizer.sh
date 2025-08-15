@@ -897,11 +897,11 @@ echo && ask_reboot
 }
 while true; do
     clear
-    echo -e "\e[93m═══════════════════════════════════════════════\e[0m"  
+    echo -e "\e[93m════════════════════════════\e[0m"  
     echo -e "        \e[94mVPS OPTIMIZER\e[0m"
-    echo -e "\e[93m═══════════════════════════════════════════════\e[0m"
+    echo -e "\e[93m════════════════════════════\e[0m"
 
-    echo -e "\e[93m+-----------------------------------------------+\e[0m" 
+    echo -e "\e[93m+------------------------------------+\e[0m" 
     printf "${GREEN} 1) ${NC}Optimizer (1-click)\n"
     printf "${GREEN} 2) ${NC}Optimizer (step by step)\n"
     printf "${GREEN} 3) ${NC}Swap Management\n"
@@ -909,7 +909,7 @@ while true; do
     printf "${GREEN} 5) ${NC}BBR Optimization\n"
     printf "${GREEN} 6) ${NC}Speedtest\n"
     printf "${GREEN} 7) ${NC}Benchmark VPS\n"
-    echo -e "\e[93m+-----------------------------------------------+\e[0m" 
+    echo -e "\e[93m+------------------------------------+\e[0m" 
     printf "${GREEN} E) ${NC}Exit the menu\n"
 
     echo
