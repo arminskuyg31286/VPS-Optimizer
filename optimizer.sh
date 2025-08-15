@@ -310,15 +310,16 @@ fix_dns() {
     echo -e "\n${YELLOW}Checking DNS latency...${NC}"
     count=1
     declare -A dns_choice_map
+    declare -A ping_times
 
     for provider in "${!dns_list[@]}"; do
-        first_ip=$(echo ${dns_list[$provider]} | awk '{print $1}')
+        first_ip=$(echo "${dns_list["$provider"]}" | awk '{print $1}')
         ping_time=$(ping -c 3 -q "$first_ip" 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
         ping_time=${ping_time:-99999}
         ping_time=${ping_time%.*}
-        ping_times[$provider]=$ping_time
-        echo -e "$RED $count. $CYAN Ping: $ping_time ms - $provider (${dns_list[$provider]})${NC}"
-        dns_choice_map[$count]=$provider
+        ping_times["$provider"]=$ping_time
+        echo -e "$RED $count. $CYAN Ping: ${ping_times["$provider"]} ms - $provider (${dns_list["$provider"]})${NC}"
+        dns_choice_map[$count]="$provider"
         ((count++))
     done
 
@@ -326,12 +327,13 @@ fix_dns() {
         read -p "Enter your choice (1-${#dns_choice_map[@]}): " choice
         if [[ -n "${dns_choice_map[$choice]}" ]]; then
             provider="${dns_choice_map[$choice]}"
-            dns_servers=$(echo -e "${dns_list[$provider]}" | sed 's/^/nameserver /')
+            dns_servers=$(echo -e "${dns_list["$provider"]}" | sed 's/^/nameserver /')
             break
         else
             echo -e "${RED}Invalid choice. Please enter a valid number.${NC}"
         fi
     done
+
     if ! command -v resolvconf >/dev/null 2>&1; then
         echo -e "\n${YELLOW}resolvconf not found, attempting to install...${NC}"
         apt-get install -y resolvconf || {
@@ -339,6 +341,7 @@ fix_dns() {
             return 1
         }
     fi
+
     if command -v resolvconf >/dev/null 2>&1; then
         echo -e "\n${YELLOW}Using resolvconf to configure DNS...${NC}"
         echo -e "$dns_servers" | resolvconf -a "$interface_name"
@@ -346,6 +349,7 @@ fix_dns() {
         echo -e "\n${YELLOW}Using /etc/resolv.conf directly...${NC}"
         echo -e "$dns_servers" > /etc/resolv.conf
     fi
+
     echo -e "\n${GREEN}System DNS Optimized.${NC}"
     sleep 1
     press_enter
