@@ -72,7 +72,6 @@ fi
 sourcelist() {
     clear
     title="Source List Adjustment to Official Repositories"
-    logo 
     echo ""
     echo -e "${MAGENTA}$title${NC}"
     echo ""
@@ -237,7 +236,6 @@ exit
 set_timezone() {
     clear
     title="Timezone Adjustment"
-    logo 
     echo && printf "${MAGENTA}%s ${NC}\n" "$title"
     echo && printf "\e[93m+-------------------------------------+\e[0m\n"
     current_timezone=$(timedatectl | awk '/Time zone/ {print $3}')
@@ -292,7 +290,6 @@ spin() {
 fix_dns() {
     clear
     title="DNS Replacement"
-    logo
     echo && echo -e "${MAGENTA}$title${NC}"
     echo && printf "\e[93m+-------------------------------------+\e[0m\n"
     interface_name=$(ip -o link show | awk '/state UP/ {print $2}' | sed 's/:$//')
@@ -349,7 +346,6 @@ fix_dns() {
 complete_update() {
     clear
     title="Update and upgrade packages"
-    logo
     echo && echo -e "${CYAN}$title ${NC}"
     echo && printf "\e[93m+-------------------------------------+\e[0m\n" 
     echo && echo -e "${RED}Please wait, it might take a couple of minutes${NC}" && echo
@@ -366,7 +362,6 @@ complete_update() {
 installations() {
     clear
     title="Install necessary packages"
-    logo
     echo && echo -e "${MAGENTA}$title ${NC}"
     echo && printf "\e[93m+-------------------------------------+\e[0m\n"
     echo && echo -e "${YELLOW}Please wait, it might take a while${NC}"
@@ -380,7 +375,6 @@ installations() {
 swap_maker() {
     clear
     title="Setup and Configure Swap File to Boost Performance"
-    logo
     echo && echo -e "${MAGENTA}$title${NC}"
     echo && printf "\e[93m+-------------------------------------+\e[0m\n"
     
@@ -517,7 +511,6 @@ swap_maker_1() {
 remove_old_sysctl() {
     clear
     title=" Network Optimizing "
-    logo
     echo && echo -e "${MAGENTA}$title${NC}"
     echo && echo -e "\e[93m+-------------------------------------+\e[0m"
     sed -i '/1000000/d' /etc/profile
@@ -633,7 +626,6 @@ optimize_ssh_configuration() {
     clear
     SSH_PATH="/etc/ssh/sshd_config"
     title="Improve SSH Configuration and Optimize SSHD"
-    logo
     echo && echo -e "${MAGENTA}$title${NC}\n"
     echo && echo -e "\e[93m+-------------------------------------+\e[0m\n"
     if [ -f "$SSH_PATH" ]; then
@@ -682,7 +674,6 @@ EOL
 
 grub_tuning() {
   clear
-  logo
   title="CPU Optimizing and Tuning (GRUB)"
   echo && echo -e "${MAGENTA}$title${NC}"
   echo && echo -e "\e[93m+-------------------------------------+\e[0m\n"
@@ -763,7 +754,6 @@ queuing() {
 }
     clear
     title="TCP Congestion Control Optimization"
-    logo
     echo ""
     echo -e "${MAGENTA}${title}${NC}"
     echo ""
@@ -879,7 +869,6 @@ fi
 benchmark() {
     clear
     title="Benchmark (iperf test)"
-    logo
     echo && echo -e "${MAGENTA}${title}${NC}"
     echo && echo -e "\e[93m+-------------------------------------+\e[0m"
     if ! command -v wget &>/dev/null; then
@@ -899,7 +888,6 @@ benchmark() {
 }
 final() {
 clear
-logo
 echo && echo -e "    ${MAGENTA} Your server fully optimized successfully${NC}"
 printf "\e[93m+-------------------------------------+\e[0m\n" 
 echo && echo -e "${MAGENTA}Please reboot the system to take effect, by running the following command: ${GREEN}reboot${NC}"
@@ -910,7 +898,6 @@ echo && ask_reboot
 while true; do
     clear
     clear
-    logo
     echo -e "\e[93m╔═══════════════════════════════════════════════╗\e[0m"  
     echo -e "\e[93m║            \e[94mVPS OPTIMIZER                      \e[93m║\e[0m"   
     echo -e "\e[93m╠═══════════════════════════════════════════════╣\e[0m"
