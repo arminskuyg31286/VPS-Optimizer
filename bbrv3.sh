@@ -235,44 +235,43 @@ EOL
 while true; do
     linux_version=$(awk -F= '/^PRETTY_NAME=/{gsub(/"/, "", $2); print $2}' /etc/os-release)
     kernel_version=$(uname -r)
+
     clear
-    echo -e "\e[93m╔═══════════════════════════════════════════════╗\e[0m"  
-    echo -e "\e[93m║            \e[96mBBRv3 using xanmod kernel          \e[93m║\e[0m"   
-    echo -e "\e[93m╠═══════════════════════════════════════════════╣\e[0m"
+    echo -e "\e[93m═══════════════════════════════════════════════\e[0m"  
+    echo -e "\e[93m     \e[96mBBRv3 using XanMod kernel     \e[93m\e[0m"   
+    echo -e "\e[93m═══════════════════════════════════════════════\e[0m"
     echo ""
     printf "\e[93m+-----------------------------------------------+\e[0m\n" 
     echo ""
-    echo -e "${MAGENTA}linux version Info：${GREEN}${linux_version}${NC}"
-    echo -e "${MAGENTA}kernel Info：${GREEN}${kernel_version}${NC}"
-    cpu_level
+    echo -e "${MAGENTA}Linux version Info: ${GREEN}${linux_version}${NC}"
+    echo -e "${MAGENTA}Kernel Info: ${GREEN}${kernel_version}${NC}"
+    if declare -f cpu_level >/dev/null 2>&1; then
+        cpu_level
+    fi
     echo ""
-    echo -e "${RED} !! TIP !! ${NC}"
-    echo ""
-    echo -e "${CYAN}Supported OS: ${GREEN} Ubuntu / Debian ${NC}"
-    echo -e "${CYAN}Supported CPU level ${GREEN} [1/2/3/4] ${NC}"
+    echo -e "${CYAN}Supported OS: ${GREEN}Ubuntu / Debian${NC}"
+    echo -e "${CYAN}Supported CPU level: ${GREEN}[1/2/3/4]${NC}"
     echo ""
     printf "\e[93m+-----------------------------------------------+\e[0m\n" 
     echo ""
-    echo -e "${GREEN} 1) ${NC} Install XanMod kernel & BBRv3 & Grub boot conf. ${NC}"
-    echo -e "${GREEN} 2) ${NC} Uninstall XanMod kernel and restore to default ${NC}"
-    echo ""
-    echo -e "${GREEN} E) ${NC} Exit the menu${NC}"
+    echo -e "${GREEN} 1) ${NC} Install XanMod kernel & BBRv3 & GRUB boot conf."
+    echo -e "${GREEN} 2) ${NC} Uninstall XanMod kernel and restore default"
+    echo -e "${GREEN} E) ${NC} Exit the menu"
     echo ""
     echo -ne "${GREEN}Select an option: ${NC}  "
-    read choice
+    read -r choice
 
     case $choice in
- 
         1)
-            install_xanmod
-            bbrv3
-            ask_reboot
+            if declare -f install_xanmod >/dev/null 2>&1; then install_xanmod; fi
+            if declare -f bbrv3 >/dev/null 2>&1; then bbrv3; fi
+            if declare -f ask_reboot >/dev/null 2>&1; then ask_reboot; fi
             ;;
         2)
-            uninstall_xanmod
-            ask_reboot
+            if declare -f uninstall_xanmod >/dev/null 2>&1; then uninstall_xanmod; fi
+            if declare -f ask_reboot >/dev/null 2>&1; then ask_reboot; fi
             ;;
-        E|e)
+        [Ee])
             echo "Exiting..."
             exit 0
             ;;
@@ -280,7 +279,6 @@ while true; do
             echo "Invalid choice. Please enter a valid option."
             ;;
     esac
-
     echo -e "\n${RED}Press Enter to continue... ${NC}"
-    read
+    read -r
 done
