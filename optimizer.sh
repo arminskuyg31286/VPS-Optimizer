@@ -314,7 +314,9 @@ fix_dns() {
     for provider in "${!dns_list[@]}"; do
         first_ip=$(echo ${dns_list[$provider]} | awk '{print $1}')
         ping_time=$(ping -c 3 -q "$first_ip" 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
-        ping_time=${ping_time:-999}
+        ping_time=${ping_time:-99999}
+        ping_time=${ping_time%.*}
+        ping_times[$provider]=$ping_time
         echo -e "$RED $count. $CYAN Ping: $ping_time ms - $provider (${dns_list[$provider]})${NC}"
         dns_choice_map[$count]=$provider
         ((count++))
