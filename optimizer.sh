@@ -293,26 +293,43 @@ fix_dns() {
     title="DNS Replacement"
     echo -e "\n${MAGENTA}$title${NC}"
     echo -e "\n\e[93m+-------------------------------------+\e[0m"
+
     interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$' | head -n 1)
     if [ -z "$interface_name" ]; then
         echo -e "\n${RED}Error: Could not determine network interface.${NC}"
         return 1
     fi
-    echo -e "\n${YELLOW}Select DNS provider:${NC}"
-    echo -e "$RED 1. $CYAN Google Public DNS (8.8.8.8, 8.8.4.4)${NC}"
-    echo -e "$RED 2. $CYAN Cloudflare DNS (1.1.1.1, 1.0.0.1)${NC}"
-    echo -e "$RED 3. $CYAN Quad9 DNS (9.9.9.9, 149.112.112.112)${NC}"
-    echo -e "$RED 4. $CYAN 403 online DNS (10.202.10.202, 10.202.10.102)${NC}"
-    while true; do
-        read -p "Enter your choice (1-4): " choice
-        case $choice in
-            1) dns_servers="nameserver 8.8.8.8\nnameserver 8.8.4.4"; break ;;
-            2) dns_servers="nameserver 1.1.1.1\nnameserver 1.0.0.1"; break ;;
-            3) dns_servers="nameserver 9.9.9.9\nnameserver 149.112.112.112"; break ;;
-            4) dns_servers="nameserver 10.202.10.202\nnameserver 10.202.10.102"; break ;;
-            *) echo -e "${RED}Invalid choice. Please enter 1-4.${NC}" ;;
-        esac
+
+    declare -A dns_list=(
+        ["Google"]="8.8.8.8 8.8.4.4"
+        ["Cloudflare"]="1.1.1.1 1.0.0.1"
+        ["Quad9"]="9.9.9.9 149.112.112.112"
+        ["403DNS"]="10.202.10.202 10.202.10.102"
+    )
+
+    echo -e "\n${YELLOW}Checking best DNS automatically...${NC}"
+    best_dns=""
+    best_latency=9999
+
+    for provider in "${!dns_list[@]}"; do
+        first_ip=$(echo ${dns_list[$provider]} | awk '{print $1}')
+        ping_time=$(ping -c 3 -q "$first_ip" 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
+        if [ -n "$ping_time" ] && (( $(echo "$ping_time < $best_latency" | bc -l) )); then
+            best_latency=$ping_time
+            best_dns=${dns_list[$provider]}
+        fi
     done
+
+    echo -e "${GREEN}Best DNS selected: ${best_dns}${NC}"
+    read -p "Do you want to use this DNS? (Y/n): " user_choice
+    if [[ "$user_choice" =~ ^[Nn]$ ]]; then
+        echo -e "${YELLOW}Keeping previous DNS.${NC}"
+        press_enter
+        return 0
+    fi
+
+    dns_servers=$(echo -e "$best_dns" | sed 's/^/nameserver /')
+
     if ! command -v resolvconf >/dev/null 2>&1; then
         echo -e "\n${YELLOW}resolvconf not found, attempting to install...${NC}"
         apt-get install -y resolvconf || {
@@ -320,6 +337,7 @@ fix_dns() {
             return 1
         }
     fi
+
     if command -v resolvconf >/dev/null 2>&1; then
         echo -e "\n${YELLOW}Using resolvconf to configure DNS...${NC}"
         echo -e "$dns_servers" | resolvconf -a "$interface_name"
@@ -327,6 +345,7 @@ fix_dns() {
         echo -e "\n${YELLOW}Using /etc/resolv.conf directly...${NC}"
         echo -e "$dns_servers" > /etc/resolv.conf
     fi
+
     echo -e "\n${GREEN}System DNS Optimized.${NC}"
     sleep 1
     press_enter
