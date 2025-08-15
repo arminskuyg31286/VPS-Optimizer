@@ -657,33 +657,45 @@ EOL
 }
 
 grub_tuning() {
-  clear
-  title="CPU Optimizing and Tuning (GRUB)"
-  echo && echo -e "${MAGENTA}$title${NC}"
-  echo && echo -e "\e[93m+-------------------------------------+\e[0m\n"
-  cp /etc/default/grub /etc/default/grub.bak
-  echo && echo -e "${YELLOW}Backup of the original grub configuration created at /etc/default/grub.bak${NC}" && echo
-  modify_grub_param() {
-    param="$1"
-    value="$2"
-    sed -i "s/^\($param\)=.*/\1=$value/" /etc/default/grub || {
-      echo && echo -e "${RED}Error modifying GRUB parameter: $param${NC}"
-      return 1
+    clear
+    title="CPU Optimizing and Tuning (GRUB)"
+    echo -e "\n${MAGENTA}$title${NC}"
+    echo -e "\n\e[93m+-------------------------------------+\e[0m\n"
+
+    if [[ ! -f /etc/default/grub.bak ]]; then
+        cp /etc/default/grub /etc/default/grub.bak
+        echo -e "${YELLOW}Backup created at /etc/default/grub.bak${NC}\n"
+    else
+        echo -e "${YELLOW}Backup already exists at /etc/default/grub.bak${NC}\n"
+    fi
+
+    add_grub_param() {
+        local param="$1"
+        local grub_line
+        grub_line=$(grep -oP '(?<=GRUB_CMDLINE_LINUX_DEFAULT=").*(?=")' /etc/default/grub)
+        if [[ "$grub_line" != *"$param"* ]]; then
+            sed -i "s/^\(GRUB_CMDLINE_LINUX_DEFAULT=\".*\)\"/\1 $param\"/" /etc/default/grub || {
+                echo -e "${RED}Error adding GRUB parameter: $param${NC}"
+                return 1
+            }
+        else
+            echo -e "${CYAN}Parameter $param already present, skipping...${NC}"
+        fi
     }
-  }
-  modify_grub_param "GRUB_CMDLINE_LINUX_DEFAULT" "quiet splash"
-  if ! grep -q "intel_pstate" /etc/default/grub; then
-    modify_grub_param "GRUB_CMDLINE_LINUX_DEFAULT" "$(grep -oP '(?<=GRUB_CMDLINE_LINUX_DEFAULT=").*(?=")' /etc/default/grub) intel_pstate=active"
-  fi
-  echo && echo -e "${YELLOW}Updating GRUB configuration...${NC}"
-  update-grub || {
-    echo && echo -e "${RED}Error updating GRUB configuration.${NC}"
-    return 1
-  }
-  echo && echo -e "${GREEN}GRUB configuration updated successfully!${NC}"
-  echo && echo -e "${YELLOW}Reboot your system to apply the changes.${NC}"
-  press_enter
+
+    sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT=.*/GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"/' /etc/default/grub
+    add_grub_param "intel_pstate=active"
+    echo -e "\n${YELLOW}Updating GRUB configuration...${NC}"
+    update-grub || {
+        echo -e "${RED}Error updating GRUB.${NC}"+
+        return 1
+    }
+    echo -e "\n${GREEN}GRUB configuration updated successfully!${NC}"
+    echo -e "${YELLOW}Reboot your system to apply the changes.${NC}"
+    press_enter
 }
+
+
 ask_bbr_version() {
     check_Hybla() {
         local param=$(sysctl net.ipv4.tcp_congestion_control | awk '{print $3}')
