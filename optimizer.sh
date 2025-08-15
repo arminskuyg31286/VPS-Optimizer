@@ -888,11 +888,8 @@ benchmark() {
 }
 final() {
 clear
-echo && echo -e "    ${MAGENTA} Your server fully optimized successfully${NC}"
-printf "\e[93m+-------------------------------------+\e[0m\n" 
-echo && echo -e "${MAGENTA}Please reboot the system to take effect, by running the following command: ${GREEN}reboot${NC}"
-echo && echo -e "${MAGENTA}Please visit me at: ${GREEN}https://t.me/ ${NC}"
-echo && printf "\e[93m+-------------------------------------+\e[0m\n" 
+echo && echo -e "${MAGENTA} Your server fully optimized successfully${NC}"
+echo && echo -e "${MAGENTA}Please reboot the system to take effect, by running the following command: ${GREEN}reboot${NC}" 
 echo && ask_reboot
 }
 while true; do
