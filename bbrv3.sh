@@ -27,25 +27,6 @@ press_enter() {
     read
 }
 
-# Define logo segments
-logo1="     ______    _______    __      _______        __      _____  ___   "
-logo2="    /      \  |   __  \  |  \    /       \      /  \     \    \|   \  "
-logo3="   /  ____  \ (  |__)  ) |   |  |         |    /    \    |.\   \    | "
-logo4="  /  /    )  )|   ____/  |   |  |_____/   )   /' /\  \   |: \   \   | "
-logo5=" (  (____/  / (   /      |.  |   //      /   //  __'  \  |.  \    \.| "
-logo6="  \        / /    \      /\  |\ |:  __   \  /   /  \\   \ |    \    \| "
-logo7="   \_____/ (_______)    (__\_|_)|__|  \___)(___/    \___)\___|\____\) "
-
-logo() {
-echo -e "${BLUE}${logo1:0:24}${RED}${logo1:24:19}${WHITE}${logo1:43:14}${GREEN}${logo1:57}${NC}"
-echo -e "${BLUE}${logo2:0:24}${RED}${logo2:24:19}${WHITE}${logo2:43:14}${GREEN}${logo2:57}${NC}"
-echo -e "${BLUE}${logo3:0:24}${RED}${logo3:24:19}${WHITE}${logo3:43:14}${GREEN}${logo3:57}${NC}"
-echo -e "${BLUE}${logo4:0:24}${RED}${logo4:24:19}${WHITE}${logo4:43:14}${GREEN}${logo4:57}${NC}"
-echo -e "${BLUE}${logo5:0:24}${RED}${logo5:24:19}${WHITE}${logo5:43:14}${GREEN}${logo5:57}${NC}"
-echo -e "${BLUE}${logo6:0:24}${RED}${logo6:24:19}${WHITE}${logo6:43:14}${GREEN}${logo6:57}${NC}"
-echo -e "${BLUE}${logo7:0:24}${RED}${logo7:24:19}${WHITE}${logo7:43:14}${GREEN}${logo7:57}${NC}"
-}
-
 if [ "$EUID" -ne 0 ]; then
     echo -e "\n ${RED}This script must be run as root.${NC}"
     exit 1
@@ -254,16 +235,10 @@ EOL
 while true; do
     linux_version=$(awk -F= '/^PRETTY_NAME=/{gsub(/"/, "", $2); print $2}' /etc/os-release)
     kernel_version=$(uname -r)
-    tg_title="https://t.me/OPIran-Official"
-    yt_title="youtube.com/@opiran-inistitute"
     clear
-    logo
     echo -e "\e[93m╔═══════════════════════════════════════════════╗\e[0m"  
     echo -e "\e[93m║            \e[96mBBRv3 using xanmod kernel          \e[93m║\e[0m"   
     echo -e "\e[93m╠═══════════════════════════════════════════════╣\e[0m"
-    echo ""
-    echo -e "${CYAN}   ${tg_title}   ${NC}"
-    echo -e "${CYAN}   ${yt_title}   ${NC}"
     echo ""
     printf "\e[93m+-----------------------------------------------+\e[0m\n" 
     echo ""
