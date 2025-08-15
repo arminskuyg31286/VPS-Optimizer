@@ -216,12 +216,12 @@ EOL
 }
 
 press_enter() {
-    echo -e "\n ${MAGENTA}Press Enter to continue... ${NC}"
+    echo -e "\n${MAGENTA}Press Enter to continue... ${NC}"
     read
 }
 
 ask_reboot() {
-echo && echo -e "\n ${YELLOW}Reboot now? (Recommended) ${GREEN}[y/n]${NC}"
+echo && echo -e "\n${YELLOW}Reboot now? (Recommended) ${GREEN}[y/n]${NC}"
 read reboot
 case "$reboot" in
         [Yy]) 
@@ -233,6 +233,7 @@ case "$reboot" in
     esac
 exit
 }
+
 set_timezone() {
     clear
     title="Timezone Adjustment"
@@ -290,55 +291,43 @@ spin() {
 fix_dns() {
     clear
     title="DNS Replacement"
-    echo && echo -e "${MAGENTA}$title${NC}"
-    echo && printf "\e[93m+-------------------------------------+\e[0m\n"
-    interface_name=$(ip -o link show | awk '/state UP/ {print $2}' | sed 's/:$//')
+    echo -e "\n${MAGENTA}$title${NC}"
+    echo -e "\n\e[93m+-------------------------------------+\e[0m"
+    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$' | head -n 1)
     if [ -z "$interface_name" ]; then
-        echo && echo -e "${RED}Error: Could not determine network interface.${NC}"
+        echo -e "\n${RED}Error: Could not determine network interface.${NC}"
         return 1
     fi
-    echo && echo -e "${YELLOW}Select DNS provider:${NC}"
+    echo -e "\n${YELLOW}Select DNS provider:${NC}"
     echo -e "$RED 1. $CYAN Google Public DNS (8.8.8.8, 8.8.4.4)${NC}"
-    echo -e "$RED 2. $CYAN Cloudflare DNS (1.1.1.1, 1.1.1.2)${NC}"
+    echo -e "$RED 2. $CYAN Cloudflare DNS (1.1.1.1, 1.0.0.1)${NC}"
     echo -e "$RED 3. $CYAN Quad9 DNS (9.9.9.9, 149.112.112.112)${NC}"
-    echo -e "$RED 4. $CYAN 403 online DNS (Iranians anti tahrim) (10.202.10.202, 10.202.10.102)${NC}"
-    echo && read -p "Enter your choice (1-4): " choice
-    case $choice in
-        1)
-            dns_servers="nameserver 8.8.8.8\nnameserver 8.8.4.4"
-            ;;
-        2)
-            dns_servers="nameserver 1.1.1.1\nnameserver 1.1.1.2"
-            ;;
-        3)
-            dns_servers="nameserver 9.9.9.9\nnameserver 149.112.112.112"
-            ;;
-        4)
-            dns_servers="nameserver 10.202.10.202\nnameserver 10.202.10.102"
-            ;;
-        *)
-            echo && echo -e "${RED}Invalid choice.${NC}"
-            return 1
-            ;;
-    esac
+    echo -e "$RED 4. $CYAN 403 online DNS (10.202.10.202, 10.202.10.102)${NC}"
+    while true; do
+        read -p "Enter your choice (1-4): " choice
+        case $choice in
+            1) dns_servers="nameserver 8.8.8.8\nnameserver 8.8.4.4"; break ;;
+            2) dns_servers="nameserver 1.1.1.1\nnameserver 1.0.0.1"; break ;;
+            3) dns_servers="nameserver 9.9.9.9\nnameserver 149.112.112.112"; break ;;
+            4) dns_servers="nameserver 10.202.10.202\nnameserver 10.202.10.102"; break ;;
+            *) echo -e "${RED}Invalid choice. Please enter 1-4.${NC}" ;;
+        esac
+    done
     if ! command -v resolvconf >/dev/null 2>&1; then
-        echo && echo -e "${YELLOW}resolvconf not found, attempting to install...${NC}"
-        if ! apt-get install -y resolvconf; then
-            echo && echo -e "${RED}Error installing resolvconf.${NC}"
+        echo -e "\n${YELLOW}resolvconf not found, attempting to install...${NC}"
+        apt-get install -y resolvconf || {
+            echo -e "\n${RED}Error installing resolvconf.${NC}"
             return 1
-        fi
+        }
     fi
     if command -v resolvconf >/dev/null 2>&1; then
-        echo && echo -e "${YELLOW}Using resolvconf to configure DNS...${NC}"
-        echo "$dns_servers" | resolvconf -a "$interface_name"
+        echo -e "\n${YELLOW}Using resolvconf to configure DNS...${NC}"
+        echo -e "$dns_servers" | resolvconf -a "$interface_name"
     else
-        echo && echo -e "${YELLOW}resolvconf not found, using /etc/resolv.conf...${NC}"
-        rm -rf /etc/resolv.conf && touch /etc/resolv.conf
-        echo "$dns_servers" > /etc/resolv.conf
+        echo -e "\n${YELLOW}Using /etc/resolv.conf directly...${NC}"
+        echo -e "$dns_servers" > /etc/resolv.conf
     fi
-    spin & SPIN_PID=$!
-    wait $SPIN_PID
-    echo && echo -e "${GREEN}System DNS Optimized.${NC}"
+    echo -e "\n${GREEN}System DNS Optimized.${NC}"
     sleep 1
     press_enter
 }
@@ -346,146 +335,141 @@ fix_dns() {
 complete_update() {
     clear
     title="Update and upgrade packages"
-    echo && echo -e "${CYAN}$title ${NC}"
-    echo && printf "\e[93m+-------------------------------------+\e[0m\n" 
-    echo && echo -e "${RED}Please wait, it might take a couple of minutes${NC}" && echo
-    apt-get update
-    apt-get upgrade -y
+    echo -e "\n${CYAN}$title${NC}"
+    echo -e "\n\e[93m+-------------------------------------+\e[0m" 
+    echo -e "\n${RED}Please wait, it might take a couple of minutes${NC}\n"
+    apt-get update && apt-get upgrade -y
     apt-get autoremove -y
-    apt-get clean -y
-    echo "140.82.114.4 github.com" | sudo tee -a /etc/hosts
-    echo "185.199.108.133 raw.githubusercontent.com" | sudo tee -a /etc/hosts
-    echo && echo -e "${GREEN}System update & upgrade completed.${NC}"
+    apt-get clean
+    grep -qxF "140.82.114.4 github.com" /etc/hosts || echo "140.82.114.4 github.com" | sudo tee -a /etc/hosts
+    grep -qxF "185.199.108.133 raw.githubusercontent.com" /etc/hosts || echo "185.199.108.133 raw.githubusercontent.com" | sudo tee -a /etc/hosts
+    echo -e "\n${GREEN}System update & upgrade completed.${NC}"
     sleep 1
     press_enter
 }
+
 installations() {
     clear
     title="Install necessary packages"
-    echo && echo -e "${MAGENTA}$title ${NC}"
-    echo && printf "\e[93m+-------------------------------------+\e[0m\n"
-    echo && echo -e "${YELLOW}Please wait, it might take a while${NC}"
-    apt-get install jq nload nethogs autossh ssh iperf software-properties-common apt-transport-https \
-                    lsb-release ca-certificates gnupg2 bash-completion curl git unzip \
-                    zip wget locales nano python3 net-tools haveged htop dnsutils iputils-ping -y
-    echo && echo -e "${GREEN}Installation of useful and necessary packages completed.${NC}"
+    echo -e "\n${MAGENTA}$title${NC}"
+    echo -e "\n\e[93m+-------------------------------------+\e[0m"
+    echo -e "\n${YELLOW}Please wait, it might take a while...${NC}"
+    apt-get update && apt-get install -y \
+        apt-transport-https \
+        autossh \
+        bash-completion \
+        ca-certificates \
+        curl \
+        dnsutils \
+        git \
+        gnupg2 \
+        haveged \
+        htop \
+        iperf \
+        iputils-ping \
+        jq \
+        locales \
+        lsb-release \
+        nano \
+        net-tools \
+        nethogs \
+        nload \
+        python3 \
+        software-properties-common \
+        ssh \
+        unzip \
+        wget \
+        zip
+    echo -e "\n${GREEN}Installation of useful and necessary packages completed.${NC}"
     sleep 1
     press_enter
 }
+
 swap_maker() {
     clear
     title="Setup and Configure Swap File to Boost Performance"
-    echo && echo -e "${MAGENTA}$title${NC}"
-    echo && printf "\e[93m+-------------------------------------+\e[0m\n"
-    
+    echo -e "\n${MAGENTA}$title${NC}"
+    echo -e "\n\e[93m+-------------------------------------+\e[0m"
+
     existing_swap=$(swapon -s | awk '$1 !~ /^Filename/ {print $1}')
     if [[ -n "$existing_swap" ]]; then
         echo -e "${YELLOW}Removing existing swap files...${NC}"
         for swap_file in $existing_swap; do
-            swapoff "$swap_file" || {
-                echo -e "${RED}Error turning off swap: $swap_file. Skipping.${NC}"
-            }
-            rm -f "$swap_file" || {
-                echo -e "${RED}Error removing swap file: $swap_file. Skipping.${NC}"
-            }
+            swapoff "$swap_file" 2>/dev/null
+            [[ -f "$swap_file" ]] && rm -f "$swap_file"
         done
     fi
-    
-    while true; do
-        echo && echo -e "$RED TIP! $NC"
-        echo -e "$CYAN It is just a suggestion, choose 2 GB if you have enough space and 512MB < RAM < 2GB $NC"
-        echo && echo -e "${YELLOW}Please select the swap file size (depends on your disk space and RAM):${NC}"
-        echo -e "${RED}1.${NC} 512MB"
-        echo -e "${RED}2.${NC} 1GB"
-        echo -e "${RED}3.${NC} 2GB"
-        echo -e "${RED}4.${NC} 4GB"
-        echo -e "${RED}5.${NC} Manually enter value (e.g., 300M, 1G)"
-        echo -e "${RED}6.${NC} No Swap"
-        echo && read -r choice
 
+    ram_total=$(free -m | awk '/^Mem:/{print $2}')
+
+    if   (( ram_total <= 512 )); then suggested_swap="1G"
+    elif (( ram_total <= 2048 )); then suggested_swap="2G"
+    elif (( ram_total <= 4096 )); then suggested_swap="4G"
+    else suggested_swap="2G"
+    fi
+
+    while true; do
+        echo -e "\n${CYAN}TIP:${NC} Recommended swap for your RAM ($ram_total MB): ${GREEN}$suggested_swap${NC}"
+        echo -e "${YELLOW}Select swap size:${NC}"
+        echo -e "0) Auto-detect & use recommended ($suggested_swap)"
+        echo -e "1) 512MB"
+        echo -e "2) 1GB"
+        echo -e "3) 2GB"
+        echo -e "4) 4GB"
+        echo -e "5) Custom (e.g., 300M, 1G)"
+        echo -e "6) No Swap"
+        read -r choice
         case $choice in
+            0) swap_size="$suggested_swap" ;;
             1) swap_size="512M" ;;
             2) swap_size="1G" ;;
             3) swap_size="2G" ;;
             4) swap_size="4G" ;;
-            5)
-                echo -ne "${YELLOW}Please enter the swap file size (e.g., 300M for MB, 1G for GB): ${NC}" 
-                read swap_size
-                ;;
-            6)
-                echo && echo -e "${RED}No swap file will be created. Exiting...${NC}"
-                return 0
-                ;;
-            *) 
-                echo && echo -e "${RED}Invalid choice. Please try again.${NC}" 
-                continue
-                ;;
+            5) read -p "Enter swap size: " swap_size ;;
+            6) echo -e "${RED}No swap will be created.${NC}"; return 0 ;;
+            *) echo -e "${RED}Invalid choice.${NC}"; continue ;;
         esac
-
-        if [[ "$swap_size" =~ ([0-9]+)(M|G) ]]; then
+        if [[ "$swap_size" =~ ^([0-9]+)(M|G)$ ]]; then
             size=${BASH_REMATCH[1]}
             unit=${BASH_REMATCH[2]}
             if [[ "$unit" == "G" ]]; then
-                count=$((size * 1024))  # Convert GB to MB
-            elif [[ "$unit" == "M" ]]; then
-                count=$size  # Already in MB
+                count=$((size * 1024))
+            else
+                count=$size
             fi
         else
-            echo -e "${RED}Invalid swap size format. Exiting...${NC}"
+            echo -e "${RED}Invalid format. Use M or G.${NC}"
             return 1
         fi
-
-        echo "Calculated swap size: $swap_size"
-        echo "Calculated count in MB: $count"
-
-        if [[ -z "$count" || $count -le 0 ]]; then
-            echo -e "${RED}Invalid swap size calculated. Exiting...${NC}"
+        available=$(df --output=avail / | tail -n1)
+        required=$(( count * 1024 ))
+        (( required > available )) && {
+            echo -e "${RED}Not enough free space for $swap_size.${NC}"
             return 1
-        fi
-        
+        }
+
         swap_file="/swapfile"
-        
-        # Create the swap file
-        dd if=/dev/zero of="$swap_file" bs=1M count="$count" status=progress 2>&1 || {
-            echo && echo -e "${RED}Error creating swap file: $swap_file. Exiting...${NC}"
-            return 1
-        }
-        
-        chmod 600 "$swap_file" || {
-            echo && echo -e "${RED}Error setting permissions on swap file. Exiting...${NC}"
-            return 1
-        }
-        
-        mkswap "$swap_file" || {
-            echo && echo -e "${RED}Error setting up swap space. Exiting...${NC}"
-            return 1
-        }
-        
-        swapon "$swap_file" || {
-            echo && echo -e "${RED}Error enabling swap file. Exiting...${NC}"
-            return 1
-        }
-        
-        echo "$swap_file none swap sw 0 0" >> /etc/fstab || {
-            echo && echo -e "${RED}Error adding swap to fstab. Manual addition required.${NC}"
-        }
-        
-        echo && echo -e "${BLUE}Modifying swap usage threshold (vm.swappiness)...${NC}"
-        echo && printf "\e[93m+-------------------------------------+\e[0m\n"
-        
+        dd if=/dev/zero of="$swap_file" bs=1M count="$count" status=progress
+        chmod 600 "$swap_file"
+        mkswap "$swap_file"
+        swapon "$swap_file"
+
+        if ! grep -q "$swap_file" /etc/fstab; then
+            echo "$swap_file none swap sw 0 0" >> /etc/fstab
+        fi
+
         swap_value=10
-        sed -i "/^vm\.swappiness=/c vm.swappiness=$swap_value" /etc/sysctl.conf || {
-            echo && echo -e "${RED}Error setting swappiness. Manual modification required.${NC}"
-        }
+        grep -q '^vm.swappiness=' /etc/sysctl.conf \
+            && sed -i "s/^vm.swappiness=.*/vm.swappiness=$swap_value/" /etc/sysctl.conf \
+            || echo "vm.swappiness=$swap_value" >> /etc/sysctl.conf
         sysctl -p
-        
-        echo && echo -e "${GREEN}Swap file created and vm.swappiness set to ${RED}$swap_value${NC}."
+
+        echo -e "${GREEN}Swap created: $swap_size, swappiness=$swap_value${NC}"
         break
     done
-    
-    sleep 1
     press_enter
 }
+
 swap_maker_1() {
     remove_all_swap() {
     for item in $swap_files $swap_partitions; do
