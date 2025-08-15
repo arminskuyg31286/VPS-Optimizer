@@ -906,10 +906,10 @@ echo && ask_reboot
 }
 while true; do
     clear
-    echo -e ""
-    echo -e "       \e[94mVPS OPTIMIZER\e[0m"
-    echo -e ""
     echo -e "\e[93m+------------------------------------+\e[0m" 
+    echo -e "       \e[94mVPS OPTIMIZER\e[0m"
+    echo -e "\e[93m+------------------------------------+\e[0m" 
+    echo -e ""
     printf "${GREEN} 1) ${NC}Optimizer (1-click)\n"
     printf "${GREEN} 2) ${NC}Optimizer (step by step)\n"
     echo -e ""
