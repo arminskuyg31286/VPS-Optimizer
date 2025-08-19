@@ -288,73 +288,6 @@ spin() {
     done
 }
 
-fix_dns() {
-    clear
-    title="DNS Replacement"
-    echo -e "\n${MAGENTA}$title${NC}"
-    echo -e "\n\e[93m+-------------------------------------+\e[0m"
-
-    interface_name=$(ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$' | head -n 1)
-    if [ -z "$interface_name" ]; then
-        echo -e "\n${RED}Error: Could not determine network interface.${NC}"
-        return 1
-    fi
-
-    declare -A dns_list=(
-        ["Google"]="8.8.8.8 8.8.4.4"
-        ["Cloudflare"]="1.1.1.1 1.0.0.1"
-        ["Quad9"]="9.9.9.9 149.112.112.112"
-        ["403DNS"]="10.202.10.202 10.202.10.102"
-    )
-
-    echo -e "\n${YELLOW}Checking DNS latency...${NC}"
-    count=1
-    declare -A dns_choice_map
-    declare -A ping_times
-
-    for provider in "${!dns_list[@]}"; do
-        first_ip=$(echo "${dns_list["$provider"]}" | awk '{print $1}')
-        ping_time=$(ping -c 3 -q "$first_ip" 2>/dev/null | awk -F'/' '/rtt/ {print $5}')
-        ping_time=${ping_time:-99999}
-        ping_time=${ping_time%.*}
-        ping_times["$provider"]=$ping_time
-        echo -e "$RED $count. $CYAN Ping: ${ping_times["$provider"]} ms - $provider (${dns_list["$provider"]})${NC}"
-        dns_choice_map[$count]="$provider"
-        ((count++))
-    done
-
-    while true; do
-        read -p "Enter your choice (1-${#dns_choice_map[@]}): " choice
-        if [[ -n "${dns_choice_map[$choice]}" ]]; then
-            provider="${dns_choice_map[$choice]}"
-            dns_servers=$(echo -e "${dns_list["$provider"]}" | sed 's/^/nameserver /')
-            break
-        else
-            echo -e "${RED}Invalid choice. Please enter a valid number.${NC}"
-        fi
-    done
-
-    if ! command -v resolvconf >/dev/null 2>&1; then
-        echo -e "\n${YELLOW}resolvconf not found, attempting to install...${NC}"
-        apt-get install -y resolvconf || {
-            echo -e "\n${RED}Error installing resolvconf.${NC}"
-            return 1
-        }
-    fi
-
-    if command -v resolvconf >/dev/null 2>&1; then
-        echo -e "\n${YELLOW}Using resolvconf to configure DNS...${NC}"
-        echo -e "$dns_servers" | resolvconf -a "$interface_name"
-    else
-        echo -e "\n${YELLOW}Using /etc/resolv.conf directly...${NC}"
-        echo -e "$dns_servers" > /etc/resolv.conf
-    fi
-
-    echo -e "\n${GREEN}System DNS Optimized.${NC}"
-    sleep 1
-    press_enter
-}
-
 complete_update() {
     clear
     title="Update and upgrade packages"
@@ -515,6 +448,7 @@ swap_maker_1() {
     fi
     sysctl -p
 }
+
 remove_old_sysctl() {
     clear
     title=" Network Optimizing "
@@ -930,25 +864,21 @@ while true; do
     case $choice in
         1)
             clear
-            fun_bar "Updating and replacing DNS nameserver" fix_dns
-            fun_bar "Complete system update and upgrade" complete_update
-            fun_bar "Installing useful packages" installations
+            # fun_bar "Complete system update and upgrade" complete_update
+            # fun_bar "Installing useful packages" installations
             fun_bar "Creating swap file with 512MB" swap_maker_1
-            fun_bar "Updating sysctl configuration" remove_old_sysctl
-            fun_bar "Updating and modifying SSH configuration" remove_old_ssh_conf
+            # fun_bar "Updating sysctl configuration" remove_old_sysctl
             ask_bbr_version
             final
             ;;
         2)
             sourcelist
-            complete_update
-            installations
-            fix_dns
-            set_timezone
+            # complete_update
+            # installations
+            # set_timezone
             swap_maker
-            remove_old_sysctl
+            # remove_old_sysctl
             grub_tuning
-            remove_old_ssh_conf
             ask_bbr_version
             final
             ;;
