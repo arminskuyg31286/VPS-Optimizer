@@ -754,10 +754,10 @@ while true; do
     echo -e "${CYAN}╠════════════════════════════════════╣${NC}"
     echo
     echo -e "${GREEN} 1) 🔧 Optimizer (1-click)${NC}"
-    echo -e "${GREEN} 2) 🛠 Optimizer (step by step)${NC}"
+    echo -e "${GREEN} 2) 🔧 Optimizer (step by step)${NC}"
     echo
     echo -e "${GREEN} 3) 💾 Swap Management${NC}"
-    echo -e "${GREEN} 4) ⚙ Grub Tuning${NC}"
+    echo -e "${GREEN} 4) 🚀 Grub Tuning${NC}"
     echo -e "${GREEN} 5) 🚀 BBR Optimization${NC}"
     echo
     echo -e "${GREEN} 6) 🌐 Speedtest${NC}"
