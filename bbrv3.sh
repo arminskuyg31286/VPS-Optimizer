@@ -7,25 +7,20 @@ MAGENTA="\e[95m"
 NC="\e[0m"
 
 ask_reboot() {
-    while true; do
-        read -rp " ${YELLOW}Reboot now? (Recommended) ${GREEN}[y/n]${NC}: " reboot
-        case "$reboot" in
-            [Yy]* ) 
-                echo -e "${GREEN}Rebooting...${NC}"
-                systemctl reboot
-                break
-                ;;
-            [Nn]* ) 
-                echo -e "${YELLOW}Reboot skipped.${NC}"
-                break
-                ;;
-            * ) 
-                echo -e "${RED}Invalid input. Please enter y or n.${NC}"
-                ;;
-        esac
-    done
+echo ""
+echo -e "\n ${YELLOW}Reboot now? (Recommended) ${GREEN}[y/n]${NC}"
+echo ""
+read reboot
+case "$reboot" in
+        [Yy]) 
+        systemctl reboot
+        ;;
+        *) 
+        return 
+        ;;
+    esac
+exit
 }
-
 
 press_enter() {
     echo -e "\n ${RED}Press Enter to continue... ${NC}"
