@@ -750,7 +750,7 @@ final() {
 while true; do
     clear
     echo -e "${CYAN}╔════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║          ${BLUE}VPS OPTIMIZER MENU${CYAN}           ║${NC}"
+    echo -e "${CYAN}║          ${BLUE}VPS OPTIMIZER MENU${CYAN}         ║${NC}"
     echo -e "${CYAN}╠════════════════════════════════════╣${NC}"
     echo
     echo -e "${GREEN} 1) 🔧 Optimizer (1-click)${NC}"
