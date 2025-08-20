@@ -740,6 +740,13 @@ benchmark() {
     press_enter
 }
 
+final() {
+    clear
+    echo && echo -e "${MAGENTA}Your server fully optimized successfully${NC}"
+    echo && echo -e "${MAGENTA}Please reboot the system to take effect, by running the following command: ${GREEN}reboot${NC}" 
+    echo && ask_reboot
+}
+
 while true; do
     clear
     echo -e "\e[93m+------------------------------------+\e[0m"
