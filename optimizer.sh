@@ -342,14 +342,12 @@ set_timezone() {
 }
 
 spin() {
-    local pid=$1
-    local delay=0.1
-    local spinstr='|/-\'
-    while kill -0 "$pid" 2>/dev/null; do
-        for i in $(seq 0 3); do
-            echo -ne "${RED}${spinstr:$i:1}${NC} \b"
-            sleep $delay
-        done
+    SPINNER="⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+    for i in $(seq 1 30); do
+        c=${SPINNER:i%${#SPINNER}:1}
+        echo -ne "${RED}${c}${NC}"
+        sleep 0.1
+        echo -ne "\b"
     done
 }
 
