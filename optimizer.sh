@@ -749,24 +749,25 @@ final() {
 
 while true; do
     clear
-    echo -e "\e[93m+------------------------------------+\e[0m"
-    echo -e "       \e[94mVPS OPTIMIZER\e[0m"
-    echo -e "\e[93m+------------------------------------+\e[0m"
-    echo -e ""
-    printf "${GREEN} 1) ${NC}Optimizer (1-click)\n"
-    printf "${GREEN} 2) ${NC}Optimizer (step by step)\n"
-    echo -e ""
-    printf "${GREEN} 3) ${NC}Swap Management\n"
-    printf "${GREEN} 4) ${NC}Grub Tuning\n"
-    printf "${GREEN} 5) ${NC}BBR Optimization\n"
-    echo -e ""
-    printf "${GREEN} 6) ${NC}Speedtest\n"
-    printf "${GREEN} 7) ${NC}Benchmark VPS\n"
-    echo -e ""
-    printf "${GREEN} E) ${NC}Exit the menu\n"
+    echo -e "${CYAN}╔════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║          ${BLUE}VPS OPTIMIZER MENU${CYAN}           ║${NC}"
+    echo -e "${CYAN}╠════════════════════════════════════╣${NC}"
     echo
-    echo -ne "${GREEN}Select an option: ${NC}"
+    echo -e "${GREEN} 1) 🔧 Optimizer (1-click)${NC}"
+    echo -e "${GREEN} 2) 🛠 Optimizer (step by step)${NC}"
+    echo
+    echo -e "${GREEN} 3) 💾 Swap Management${NC}"
+    echo -e "${GREEN} 4) ⚙ Grub Tuning${NC}"
+    echo -e "${GREEN} 5) 🚀 BBR Optimization${NC}"
+    echo
+    echo -e "${GREEN} 6) 🌐 Speedtest${NC}"
+    echo -e "${GREEN} 7) 📊 Benchmark VPS${NC}"
+    echo
+    echo -e "${RED} E) ❌ Exit${NC}"
+    echo
+    echo -ne "${YELLOW}Select an option: ${NC}"
     read -r choice
+
     case $choice in
         1)
             clear
@@ -799,13 +800,14 @@ while true; do
             benchmark
             ;;
         E|e)
-            echo && echo -e "${RED}Exiting...${NC}"
+            echo -e "\n${RED}Exiting...${NC}"
             exit 0
             ;;
         *)
-            echo && echo -e "${RED}Invalid choice. Please enter a valid option.${NC}"
+            echo -e "\n${RED}Invalid choice. Please enter a valid option.${NC}"
             ;;
     esac
-    echo && echo -e "\n${RED}Press Enter to continue...${NC}"
+
+    echo -e "\n${MAGENTA}Press Enter to continue...${NC}"
     read -r
 done
