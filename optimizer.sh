@@ -703,43 +703,6 @@ speedtestcli() {
     fi
 }
 
-benchmark() {
-    clear
-    title="Benchmark (iperf test)"
-    echo && echo -e "${MAGENTA}${title}${NC}"
-    echo && echo -e "\e[93m+-------------------------------------+\e[0m"
-    if ! command -v wget &>/dev/null; then
-        echo -e "${YELLOW}Installing wget...${NC}"
-        sudo apt-get update && sudo apt-get install wget -y
-    fi
-
-    echo && echo -e "${MAGENTA}TIP!${NC}"
-    echo -e "${YELLOW}THIS TEST TAKES A LONG TIME, SO PLEASE BE PATIENT${NC}"
-    echo && echo -e "${GREEN}Valid Regions: ${YELLOW}na, sa, eu, au, asia, africa, middle-east, india, china, iran${NC}"
-    echo && echo -ne "Please type the destination: "
-    read -r location
-
-    valid_locations=("na" "sa" "eu" "au" "asia" "africa" "middle-east" "india" "china" "iran")
-    if [[ ! " ${valid_locations[*]} " =~ " ${location} " ]]; then
-        echo -e "${RED}Invalid region. Please choose a valid one.${NC}"
-        return 1
-    fi
-
-    echo -e "${YELLOW}Running benchmark test to $location...${NC}"
-
-    if command -v wget &>/dev/null; then
-        wget -qO- network-speed.xyz | bash -s -- -r "$location"
-    elif command -v curl &>/dev/null; then
-        curl -s network-speed.xyz | bash -s -- -r "$location"
-    else
-        echo -e "${RED}Error: wget or curl is required.${NC}"
-        return 1
-    fi
-
-    echo && echo -e "${GREEN}Benchmark test completed successfully.${NC}"
-    press_enter
-}
-
 final() {
     clear
     echo && echo -e "${MAGENTA}Your server fully optimized successfully${NC}"
@@ -750,18 +713,16 @@ final() {
 while true; do
     clear
     echo -e "${CYAN}╔════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║          ${BLUE}VPS OPTIMIZER MENU${CYAN}         ║${NC}"
+    echo -e "${CYAN}║          ${BLUE}VPS OPTIMIZER MENU${CYAN}        ║${NC}"
     echo -e "${CYAN}╠════════════════════════════════════╣${NC}"
     echo
     echo -e "${GREEN} 1) 🔧 Optimizer (1-click)${NC}"
     echo -e "${GREEN} 2) 🔧 Optimizer (step by step)${NC}"
     echo
     echo -e "${GREEN} 3) 💾 Swap Management${NC}"
-    echo -e "${GREEN} 4) 🚀 Grub Tuning${NC}"
-    echo -e "${GREEN} 5) 🚀 BBR Optimization${NC}"
+    echo -e "${GREEN} 4) 🚀 BBR Optimization${NC}"
     echo
-    echo -e "${GREEN} 6) 🌐 Speedtest${NC}"
-    echo -e "${GREEN} 7) 📊 Benchmark VPS${NC}"
+    echo -e "${GREEN} 5) 🌐 Speedtest${NC}"
     echo
     echo -e "${RED} E) ❌ Exit${NC}"
     echo
@@ -788,16 +749,10 @@ while true; do
             swap_maker
             ;;
         4)
-            grub_tuning
-            ;;
-        5)
             ask_bbr_version
             ;;
-        6)
+        5)
             speedtestcli
-            ;;
-        7)
-            benchmark
             ;;
         E|e)
             echo -e "\n${RED}Exiting...${NC}"
